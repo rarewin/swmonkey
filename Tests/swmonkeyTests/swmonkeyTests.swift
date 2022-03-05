@@ -1,47 +1,40 @@
 import XCTest
-import class Foundation.Bundle
+@testable import swmonkey
 
 final class swmonkeyTests: XCTestCase {
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct
-        // results.
 
-        // Some of the APIs that we use below are available in macOS 10.13 and above.
-        guard #available(macOS 10.13, *) else {
-            return
-        }
+    func testNextToken() throws {
+      let input = """
+      =+(){},; let five = 5;
+      let ten = 10;
 
-        // Mac Catalyst won't have `Process`, but it is supported for executables.
-        #if !targetEnvironment(macCatalyst)
+      let add = fn(x, y) {
+        x + y;
+      };
 
-        let fooBinary = productsDirectory.appendingPathComponent("swmonkey")
+      let result = add(five, ten);
+      !-/*5;
+      5 < 10 > 5;
 
-        let process = Process()
-        process.executableURL = fooBinary
+      if (5 < 10) {
+        return true;
+      } else {
+        return false;
+      }
 
-        let pipe = Pipe()
-        process.standardOutput = pipe
+      10 == 10;
+      10 != 9;
 
-        try process.run()
-        process.waitUntilExit()
+      "foobar"
+      "foo bar"
 
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        let output = String(data: data, encoding: .utf8)
+      [1, 2];
 
-        XCTAssertEqual(output, "Hello, world!\n")
-        #endif
-    }
+      {"foo": "bar"}
+      """
+      let lexer = Lexer(input: input)
 
-    /// Returns path to the built products directory.
-    var productsDirectory: URL {
-      #if os(macOS)
-        for bundle in Bundle.allBundles where bundle.bundlePath.hasSuffix(".xctest") {
-            return bundle.bundleURL.deletingLastPathComponent()
-        }
-        fatalError("couldn't find the products directory")
-      #else
-        return Bundle.main.bundleURL
-      #endif
+      XCTAssertEqual(lexer.next(), Token(tokenType: Token.TokenType.eq, literal: "="))
+      XCTAssertEqual(lexer.next(), Token(tokenType: Token.TokenType.plus, literal: "+"))
     }
 }
