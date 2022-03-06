@@ -28,7 +28,7 @@ class Lexer {
       }
       break
     case "0"..."9":
-      while self.input.first?.properties.isHexDigit ?? false {  // TODO: ちゃんとした条件に変更する
+      while self.input.first.isDigit() {
         ch = self.input.removeFirst()
         str.append(ch.description)
       }
@@ -63,6 +63,18 @@ extension Token.TokenType {
       } else {
         self = .illegal
       }
+    }
+  }
+}
+
+extension Optional where Wrapped == Unicode.Scalar {
+  func isDigit() -> Bool {
+    guard let ch = self else {
+      return false
+    }
+    switch ch {
+    case "0"..."9": return true
+    default: return false
     }
   }
 }
