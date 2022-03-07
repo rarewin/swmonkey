@@ -54,6 +54,7 @@ extension Token.TokenType {
     case "}": self = .rightBrace
 
     case "let": self = .let
+    case "fn": self = .function
 
     default:
       if str.allSatisfy({ $0.isLetter || $0 == "_" }) {
@@ -72,9 +73,6 @@ extension Optional where Wrapped == Unicode.Scalar {
     guard let ch = self else {
       return false
     }
-    switch ch {
-    case "0"..."9": return true
-    default: return false
-    }
+    return ("0"..."9" ~= ch)
   }
 }

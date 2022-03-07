@@ -58,6 +58,19 @@ final class swmonkeyTests: XCTestCase {
       (Token.TokenType.let, "let"),
       (Token.TokenType.ident, "add"),
       (Token.TokenType.assign, "="),
+      (Token.TokenType.function, "fn"),
+      (Token.TokenType.leftParen, "("),
+      (Token.TokenType.ident, "x"),
+      (Token.TokenType.comma, ","),
+      (Token.TokenType.ident, "y"),
+      (Token.TokenType.rightParen, ")"),
+      (Token.TokenType.leftBrace, "{"),
+      (Token.TokenType.ident, "x"),
+      (Token.TokenType.plus, "+"),
+      (Token.TokenType.ident, "y"),
+      (Token.TokenType.semicolon, ";"),
+      (Token.TokenType.rightBrace, "}"),
+      (Token.TokenType.semicolon, ";"),
     ]
     let lexer = Lexer(input: input)
 
