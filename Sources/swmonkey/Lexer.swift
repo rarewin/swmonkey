@@ -26,9 +26,18 @@ class Lexer {
         ch = self.input.removeFirst()
         str.append(ch.description)
       }
-      break
     case "0"..."9":
       while self.input.first.isDigit() {
+        ch = self.input.removeFirst()
+        str.append(ch.description)
+      }
+    case "=":
+      if self.input.first == "=" {
+        ch = self.input.removeFirst()
+        str.append(ch.description)
+      }
+    case "!":
+      if self.input.first == "=" {
         ch = self.input.removeFirst()
         str.append(ch.description)
       }
@@ -44,6 +53,16 @@ extension Token.TokenType {
     switch str {
     case "=": self = .assign
     case "+": self = .plus
+    case "-": self = .minus
+    case "!": self = .bang
+    case "*": self = .asterisk
+    case "/": self = .slash
+
+    case "<": self = .lt
+    case ">": self = .gt
+
+    case "==": self = .eq
+    case "!=": self = .notEq
 
     case ",": self = .comma
     case ";": self = .semicolon
@@ -53,8 +72,13 @@ extension Token.TokenType {
     case "{": self = .leftBrace
     case "}": self = .rightBrace
 
-    case "let": self = .let
     case "fn": self = .function
+    case "let": self = .let
+    case "true": self = .true
+    case "false": self = .false
+    case "if": self = .if
+    case "else": self = .else
+    case "return": self = .return
 
     default:
       if str.allSatisfy({ $0.isLetter || $0 == "_" }) {
