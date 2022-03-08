@@ -41,6 +41,14 @@ class Lexer {
         ch = self.input.removeFirst()
         str.append(ch.description)
       }
+    case "\"":
+      str = ""
+      while self.input.first != "\"" {
+        ch = self.input.removeFirst()
+        str.append(ch.description)
+      }
+      self.input.removeFirst()
+      return Token(tokenType: Token.TokenType(str: "\"\(str)\""), literal: str)
     default: break
     }
 
@@ -66,11 +74,14 @@ extension Token.TokenType {
 
     case ",": self = .comma
     case ";": self = .semicolon
+    case ":": self = .colon
 
     case "(": self = .leftParen
     case ")": self = .rightParen
     case "{": self = .leftBrace
     case "}": self = .rightBrace
+    case "[": self = .leftBracket
+    case "]": self = .rightBracket
 
     case "fn": self = .function
     case "let": self = .let
@@ -85,6 +96,8 @@ extension Token.TokenType {
         self = .ident
       } else if str.allSatisfy({ $0.isNumber }) {
         self = .int
+      } else if str.first == "\"" && str.last == "\"" {
+        self = .string
       } else {
         self = .illegal
       }

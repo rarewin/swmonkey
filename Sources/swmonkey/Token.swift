@@ -70,7 +70,7 @@ class Token {
     case `return`
 
     /// string
-    case stringToken
+    case string
   }
 
   let tokenType: TokenType

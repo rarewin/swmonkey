@@ -124,6 +124,22 @@ final class swmonkeyTests: XCTestCase {
       (Token.TokenType.notEq, "!="),
       (Token.TokenType.int, "9"),
       (Token.TokenType.semicolon, ";"),
+
+      (Token.TokenType.string, "foobar"),
+      (Token.TokenType.string, "foo bar"),
+
+      (Token.TokenType.leftBracket, "["),
+      (Token.TokenType.int, "1"),
+      (Token.TokenType.comma, ","),
+      (Token.TokenType.int, "2"),
+      (Token.TokenType.rightBracket, "]"),
+      (Token.TokenType.semicolon, ";"),
+
+      (Token.TokenType.leftBrace, "{"),
+      (Token.TokenType.string, "foo"),
+      (Token.TokenType.colon, ":"),
+      (Token.TokenType.string, "bar"),
+      (Token.TokenType.rightBrace, "}"),
     ]
 
     let lexer = Lexer(input: input)
