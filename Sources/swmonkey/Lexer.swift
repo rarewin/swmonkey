@@ -11,7 +11,12 @@ class Lexer {
   }
 
   /// 次のトークンを取得する
-  func next() -> Token {
+  func next() -> Token? {
+
+    guard self.input.first != nil else {
+      return nil
+    }
+
     var ch = self.input.removeFirst()
 
     while ch.properties.isWhitespace {

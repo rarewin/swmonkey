@@ -87,3 +87,9 @@ extension Token: Equatable {
     return (lhs.tokenType == rhs.tokenType) && (lhs.literal == lhs.literal)
   }
 }
+
+extension Token: TextOutputStreamable {
+  func write<Target: TextOutputStream>(to target: inout Target) {
+    print("Token(type: \(tokenType), literal: \(literal))", terminator: "", to: &target)
+  }
+}
