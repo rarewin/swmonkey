@@ -84,7 +84,7 @@ class Token {
 
 extension Token: Equatable {
   public static func == (lhs: Token, rhs: Token) -> Bool {
-    return (lhs.tokenType == rhs.tokenType) && (lhs.literal == lhs.literal)
+    return (lhs.tokenType == rhs.tokenType) && (lhs.literal == rhs.literal)
   }
 }
 
