@@ -2,7 +2,7 @@ import XCTest
 
 @testable import swmonkey
 
-final class swmonkeyTests: XCTestCase {
+final class swmonkeyLexerTests: XCTestCase {
 
   func testNextToken() throws {
     let input = """
