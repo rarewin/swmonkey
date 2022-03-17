@@ -1,12 +1,12 @@
 class Ast {
   enum StatementNode: Equatable {
-    case letStatement(name: Token, value: ExpressionNode)
+    case letStatement(token: Token, name: Identifier, value: ExpressionNode)
   }
 
   enum ExpressionNode: Equatable {
-    case identifier(token: Token)
-    case integerLiteral(token: Token)
-    case stringLiteral(token: Token)
+    case identifier(token: Token, value: String)
+    case integer(token: Token, value: Int64)
+    case string(token: Token, value: String)
   }
 
   enum OperationPrecedence: Int, Equatable {
@@ -18,5 +18,10 @@ class Ast {
     case prefix
     case call
     case index
+  }
+
+  struct Identifier: Equatable {
+    let token: Token
+    let value: String
   }
 }

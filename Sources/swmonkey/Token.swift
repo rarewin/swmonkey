@@ -90,6 +90,6 @@ extension Token: Equatable {
 
 extension Token: TextOutputStreamable {
   func write<Target: TextOutputStream>(to target: inout Target) {
-    print("Token(type: \(tokenType), literal: \(literal))", terminator: "", to: &target)
+    print("Token{type: \(tokenType), literal: \(literal)}", terminator: "", to: &target)
   }
 }
