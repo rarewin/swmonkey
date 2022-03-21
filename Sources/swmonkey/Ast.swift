@@ -7,6 +7,11 @@ class Ast {
     case identifier(token: Token, value: String)
     case integer(token: Token, value: Int64)
     case string(token: Token, value: String)
+    case boolean(token: Token, value: Bool)
+
+    init?(token: Token, value: Bool) {
+      self = .boolean(token: token, value: value)
+    }
   }
 
   enum OperationPrecedence: Int, Equatable {

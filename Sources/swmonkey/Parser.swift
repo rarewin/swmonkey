@@ -96,6 +96,10 @@ class Parser {
       return Ast.ExpressionNode.identifier(token: token, value: token.literal)
     case .int:
       return Ast.ExpressionNode.integer(token: token, value: Int64(token.literal)!)
+    case .true:
+      return Ast.ExpressionNode.boolean(token: token, value: true)
+    case .false:
+      return Ast.ExpressionNode.boolean(token: token, value: false)
     default:
       fatalError("unimplemented")
     }
