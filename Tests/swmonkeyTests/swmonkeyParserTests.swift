@@ -56,8 +56,24 @@ final class swmonkeyParserTests: XCTestCase {
         input: "let y = true;",
         ident: "y",
         node: Ast.ExpressionNode.boolean(
-          token: Token(tokenType: Token.TokenType.true, literal: "true"),
+          token: Token(tokenType: .true, literal: "true"),
           value: true
+        )
+      ),
+      (
+        input: "let x = false;",
+        ident: "x",
+        node: Ast.ExpressionNode.boolean(
+          token: Token(tokenType: .false, literal: "false"),
+          value: false
+        )
+      ),
+      (
+        input: "let foobar = y;",
+        ident: "foobar",
+        node: Ast.ExpressionNode.identifier(
+          token: Token(tokenType: .ident, literal: "y"),
+          value: "y"
         )
       ),
     ]
