@@ -124,4 +124,23 @@ final class swmonkeyParserTests: XCTestCase {
       )
     }
   }
+
+  func testExpressionStatement() throws {
+    do {
+      let input = "foobar;"
+      let lexer = Lexer(input: input)
+      let parser = Parser(lexer: lexer)
+
+      XCTAssertEqual(
+        parser.next(),
+        Ast.StatementNode.expressionStatement(
+          token: Token(tokenType: .ident, literal: "foobar"),
+          expression: Ast.ExpressionNode.identifier(
+            token: Token(tokenType: .ident, literal: "foobar"),
+            value: "foobar"
+          )
+        )
+      )
+    }
+  }
 }

@@ -12,6 +12,9 @@ class Parser {
     nextToken()
   }
 
+  /// パースして次のstatementを取得する
+  ///
+  /// - Returns: statement node
   func next() -> Ast.StatementNode? {
     return parseStatement()
   }
@@ -22,8 +25,13 @@ class Parser {
     peekToken = lexer.next()
   }
 
+  /// `expected` なトークンであれば消費する
+  ///
+  /// - Parameter
+  ///   - expected: 期待するトークン
+  /// - Returns: 期待したトークン。currentが異なるtypeであればnilが帰る
   func consumeExpectedToken(expected: Token.TokenType) -> Token? {
-    guard let token = peekToken else {
+    guard let token = currentToken else {
       return nil
     }
 
@@ -35,6 +43,9 @@ class Parser {
     }
   }
 
+  /// statementをパース
+  ///
+  /// - Returns: statement node
   func parseStatement() -> Ast.StatementNode? {
     guard let token = currentToken else {
       return nil
@@ -46,19 +57,14 @@ class Parser {
     case .return:
       return parseReturnStatement()
     default:
-      break
+      return parseExpressionStatement()
     }
-
-    return nil
   }
 
+  /// let statementをパース
   func parseLetStatement() -> Ast.StatementNode? {
 
-    guard let token = currentToken else {
-      return nil
-    }
-
-    guard token.tokenType == .let else {
+    guard let token = consumeExpectedToken(expected: .let) else {
       return nil
     }
 
@@ -72,40 +78,60 @@ class Parser {
       return nil
     }
 
-    guard let value = parseExpression(precedence: Ast.OperationPrecedence.lowest) else {
+    guard let value = parseExpression(precedence: .lowest) else {
       return nil
     }
 
     return .letStatement(token: token, name: name, value: value)
   }
 
+  /// return statementをパース
   func parseReturnStatement() -> Ast.StatementNode? {
-    guard let token = currentToken else {
+    guard let token = consumeExpectedToken(expected: .return) else {
       return nil
     }
 
-    guard token.tokenType == .return else {
-      return nil
-    }
-
-    guard let returnValue = parseExpression(precedence: Ast.OperationPrecedence.lowest) else {
+    guard let returnValue = parseExpression(precedence: .lowest) else {
       return nil
     }
 
     return .returnStatement(token: token, returnValue: returnValue)
   }
 
-  func parseExpression(precedence: Ast.OperationPrecedence) -> Ast.ExpressionNode? {
-    guard let _ = peekToken else {
+  /// expression statementをパース
+  ///
+  /// - Returns: パース結果
+  func parseExpressionStatement() -> Ast.StatementNode? {
+    guard let token = currentToken else {
       return nil
     }
 
-    return prefixParse()
+    guard let expression = parseExpression(precedence: .lowest) else {
+      return nil
+    }
+
+    return .expressionStatement(token: token, expression: expression)
   }
 
+  /// expresionをパース
+  ///
+  /// - Parameter
+  ///   - precedence: 順位
+  /// - Returns: パース結果
+  func parseExpression(precedence: Ast.OperationPrecedence) -> Ast.ExpressionNode? {
+    let expression = prefixParse()
+
+    if peekToken?.tokenType == .semicolon {
+      let _ = consumeExpectedToken(expected: .semicolon)
+    }
+
+    return expression
+  }
+
+  /// prefixをパース
   func prefixParse() -> Ast.ExpressionNode? {
 
-    guard let token = peekToken else {
+    guard let token = currentToken else {
       return nil
     }
 

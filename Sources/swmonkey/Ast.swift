@@ -2,6 +2,7 @@ class Ast {
   enum StatementNode: Equatable {
     case letStatement(token: Token, name: Identifier, value: ExpressionNode)
     case returnStatement(token: Token, returnValue: ExpressionNode)
+    case expressionStatement(token: Token, expression: ExpressionNode)
   }
 
   enum ExpressionNode: Equatable {
