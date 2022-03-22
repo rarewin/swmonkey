@@ -84,6 +84,44 @@ final class swmonkeyParserTests: XCTestCase {
 
       try testLetStatement(parsed: parser.next(), ident: t.ident, node: t.node)
     }
+  }
 
+  func testReturnStatements() throws {
+    [
+      (
+        input: "return 5;",
+        returnValue: Ast.ExpressionNode.integer(
+          token: Token(tokenType: .int, literal: "5"),
+          value: 5
+        )
+      ),
+      (
+        input: "return 10;",
+        returnValue: Ast.ExpressionNode.integer(
+          token: Token(tokenType: .int, literal: "10"),
+          value: 10
+        )
+      ),
+      (
+        input: "return 993322;",
+        returnValue: Ast.ExpressionNode.integer(
+          token: Token(tokenType: .int, literal: "993322"),
+          value: 993322
+        )
+      ),
+    ].forEach { test in
+      let lexer = Lexer(input: test.input)
+      let parser = Parser(lexer: lexer)
+
+      let returnToken = Token(tokenType: .return, literal: "return")
+
+      XCTAssertEqual(
+        parser.next(),
+        Ast.StatementNode.returnStatement(
+          token: returnToken,
+          returnValue: test.returnValue
+        )
+      )
+    }
   }
 }

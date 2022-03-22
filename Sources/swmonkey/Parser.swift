@@ -43,6 +43,8 @@ class Parser {
     switch token.tokenType {
     case .let:
       return parseLetStatement()
+    case .return:
+      return parseReturnStatement()
     default:
       break
     }
@@ -75,6 +77,22 @@ class Parser {
     }
 
     return .letStatement(token: token, name: name, value: value)
+  }
+
+  func parseReturnStatement() -> Ast.StatementNode? {
+    guard let token = currentToken else {
+      return nil
+    }
+
+    guard token.tokenType == .return else {
+      return nil
+    }
+
+    guard let returnValue = parseExpression(precedence: Ast.OperationPrecedence.lowest) else {
+      return nil
+    }
+
+    return .returnStatement(token: token, returnValue: returnValue)
   }
 
   func parseExpression(precedence: Ast.OperationPrecedence) -> Ast.ExpressionNode? {
