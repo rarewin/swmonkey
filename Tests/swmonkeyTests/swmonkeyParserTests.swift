@@ -143,4 +143,23 @@ final class swmonkeyParserTests: XCTestCase {
       )
     }
   }
+
+  func testIntegerLiteralExpression() throws {
+    do {
+      let input = "5;"
+      let lexer = Lexer(input: input)
+      let parser = Parser(lexer: lexer)
+
+      XCTAssertEqual(
+        parser.next(),
+        Ast.StatementNode.expressionStatement(
+          token: Token(tokenType: .int, literal: "5"),
+          expression: Ast.ExpressionNode.integer(
+            token: Token(tokenType: .int, literal: "5"),
+            value: 5
+          )
+        )
+      )
+    }
+  }
 }
