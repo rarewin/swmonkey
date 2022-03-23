@@ -10,6 +10,7 @@ class Ast {
     case integer(token: Token, value: Int64)
     case string(token: Token, value: String)
     case boolean(token: Token, value: Bool)
+    indirect case prefixExpression(token: Token, right: Ast.ExpressionNode)
 
     init?(token: Token, value: Bool) {
       self = .boolean(token: token, value: value)

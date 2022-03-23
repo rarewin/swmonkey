@@ -162,4 +162,57 @@ final class swmonkeyParserTests: XCTestCase {
       )
     }
   }
+
+  func testPrefixExpressions() throws {
+    [
+      (
+        input: "!5;",
+        token: Token(tokenType: .bang, literal: "!"),
+        right: Ast.ExpressionNode.integer(
+          token: Token(tokenType: .int, literal: "5"),
+          value: 5
+        )
+      ),
+      (
+        input: "-15;",
+        token: Token(tokenType: .minus, literal: "-"),
+        right: Ast.ExpressionNode.integer(
+          token: Token(tokenType: .int, literal: "15"),
+          value: 15
+        )
+      ),
+      (
+        input: "!true;",
+        token: Token(tokenType: .bang, literal: "!"),
+        right: Ast.ExpressionNode.boolean(
+          token: Token(tokenType: .true, literal: "true"),
+          value: true
+        )
+      ),
+      (
+        input: "!false;",
+        token: Token(tokenType: .bang, literal: "!"),
+        right: Ast.ExpressionNode.boolean(
+          token: Token(tokenType: .false, literal: "false"),
+          value: false
+        )
+      ),
+    ].forEach { test in
+      let lexer = Lexer(input: test.input)
+      let parser = Parser(lexer: lexer)
+
+      let parsed = parser.next()
+
+      guard case let .expressionStatement(token: token, expression: expression) = parsed
+      else {
+        fatalError("\(String(describing: parsed)) is not prefix expression")
+      }
+
+      XCTAssertEqual(test.token, token)
+      XCTAssertEqual(
+        Ast.ExpressionNode.prefixExpression(token: test.token, right: test.right),
+        expression
+      )
+    }
+  }
 }

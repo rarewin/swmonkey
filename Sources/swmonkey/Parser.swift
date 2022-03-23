@@ -135,6 +135,8 @@ class Parser {
       return nil
     }
 
+    nextToken()
+
     switch token.tokenType {
     case .ident:
       return Ast.ExpressionNode.identifier(token: token, value: token.literal)
@@ -144,8 +146,13 @@ class Parser {
       return Ast.ExpressionNode.boolean(token: token, value: true)
     case .false:
       return Ast.ExpressionNode.boolean(token: token, value: false)
+    case .bang, .minus:
+      guard let right = parseExpression(precedence: .prefix) else {
+        return nil
+      }
+      return Ast.ExpressionNode.prefixExpression(token: token, right: right)
     default:
-      fatalError("unimplemented")
+      fatalError("unimplemented: \(#function) - \(#line) for \(token)")
     }
   }
 }
