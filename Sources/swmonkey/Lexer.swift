@@ -100,7 +100,7 @@ extension Token.TokenType {
       if str.allSatisfy({ $0.isLetter || $0 == "_" }) {
         self = .ident
       } else if str.allSatisfy({ $0.isNumber }) {
-        self = .int
+        self = .int(value: Int64(str) ?? 0)
       } else if str.first == "\"" && str.last == "\"" {
         self = .string
       } else {

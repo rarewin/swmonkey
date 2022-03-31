@@ -48,7 +48,7 @@ final class swmonkeyParserTests: XCTestCase {
         input: "let x = 5;",
         ident: "x",
         node: Ast.ExpressionNode.integer(
-          token: Token(tokenType: .int, literal: "5"),
+          token: Token(tokenType: .int(value: 5), literal: "5"),
           value: 5
         )
       ),
@@ -91,21 +91,21 @@ final class swmonkeyParserTests: XCTestCase {
       (
         input: "return 5;",
         returnValue: Ast.ExpressionNode.integer(
-          token: Token(tokenType: .int, literal: "5"),
+          token: Token(tokenType: .int(value: 5), literal: "5"),
           value: 5
         )
       ),
       (
         input: "return 10;",
         returnValue: Ast.ExpressionNode.integer(
-          token: Token(tokenType: .int, literal: "10"),
+          token: Token(tokenType: .int(value: 10), literal: "10"),
           value: 10
         )
       ),
       (
         input: "return 993322;",
         returnValue: Ast.ExpressionNode.integer(
-          token: Token(tokenType: .int, literal: "993322"),
+          token: Token(tokenType: .int(value: 993322), literal: "993322"),
           value: 993322
         )
       ),
@@ -153,9 +153,9 @@ final class swmonkeyParserTests: XCTestCase {
       XCTAssertEqual(
         parser.next(),
         Ast.StatementNode.expressionStatement(
-          token: Token(tokenType: .int, literal: "5"),
+          token: Token(tokenType: .int(value: 5), literal: "5"),
           expression: Ast.ExpressionNode.integer(
-            token: Token(tokenType: .int, literal: "5"),
+            token: Token(tokenType: .int(value: 5), literal: "5"),
             value: 5
           )
         )
@@ -169,7 +169,7 @@ final class swmonkeyParserTests: XCTestCase {
         input: "!5;",
         token: Token(tokenType: .bang, literal: "!"),
         right: Ast.ExpressionNode.integer(
-          token: Token(tokenType: .int, literal: "5"),
+          token: Token(tokenType: .int(value: 5), literal: "5"),
           value: 5
         )
       ),
@@ -177,7 +177,7 @@ final class swmonkeyParserTests: XCTestCase {
         input: "-15;",
         token: Token(tokenType: .minus, literal: "-"),
         right: Ast.ExpressionNode.integer(
-          token: Token(tokenType: .int, literal: "15"),
+          token: Token(tokenType: .int(value: 15), literal: "15"),
           value: 15
         )
       ),

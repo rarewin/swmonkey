@@ -1,6 +1,6 @@
 class Token {
 
-  enum TokenType {
+  enum TokenType: Equatable {
     /// invalid token
     case illegal
     /// End of File
@@ -9,7 +9,7 @@ class Token {
     /// Identifier
     case ident
     /// Integer
-    case int
+    case int(value: Int64)
 
     /// `='
     case assign
@@ -84,6 +84,18 @@ class Token {
 
 extension Token: Equatable {
   public static func == (lhs: Token, rhs: Token) -> Bool {
+
+    // switch lhs.tokenType {
+    // case let .int(value: lhsValue):
+    //   if case let .int(value: rhsValue) = rhs.tokenType {
+    //     return (lhsValue == rhsValue) && (lhs.literal == rhs.literal)
+    //   } else {
+    //     return false
+    //   }
+    // default:
+    //   break
+    // }
+
     return (lhs.tokenType == rhs.tokenType) && (lhs.literal == rhs.literal)
   }
 }
