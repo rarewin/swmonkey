@@ -47,21 +47,20 @@ class Lexer {
         str.append(ch.description)
       }
     case "\"":
-      str = ""
       while self.input.first != "\"" {
         ch = self.input.removeFirst()
         str.append(ch.description)
       }
-      self.input.removeFirst()
-      return Token(tokenType: Token.TokenType(str: "\"\(str)\""), literal: str)
+      ch = self.input.removeFirst()
+      str.append(ch.description)
     default: break
     }
 
-    return Token(tokenType: Token.TokenType(str: str), literal: str)
+    return Token(str: str)
   }
 }
 
-extension Token.TokenType {
+extension Token {
   init(str: String) {
     switch str {
     case "=": self = .assign
@@ -97,12 +96,15 @@ extension Token.TokenType {
     case "return": self = .return
 
     default:
-      if str.allSatisfy({ $0.isLetter || $0 == "_" }) {
-        self = .ident
-      } else if str.allSatisfy({ $0.isNumber }) {
+      if str.allSatisfy({ $0.isNumber }) {
         self = .int(value: Int64(str) ?? 0)
       } else if str.first == "\"" && str.last == "\"" {
-        self = .string
+        var tmp = str
+        tmp.removeFirst()
+        tmp.removeLast()
+        self = .string(string: tmp)
+      } else if str.allSatisfy({ $0.isLetter || $0 == "_" }) {
+        self = .ident(literal: str)
       } else {
         self = .illegal
       }

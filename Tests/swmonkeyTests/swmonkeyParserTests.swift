@@ -12,13 +12,10 @@ final class swmonkeyParserTests: XCTestCase {
       fatalError("\(String(describing: parsed)) is not a let statement")
     }
 
-    XCTAssertEqual(token, Token(tokenType: .let, literal: "let"))
+    XCTAssertEqual(token, Token.let)
     XCTAssertEqual(
       name,
-      Ast.Identifier(
-        token: Token(tokenType: .ident, literal: ident),
-        value: ident
-      )
+      Ast.Identifier(token: Token.ident(literal: ident), value: ident)
     )
     XCTAssertEqual(value, node)
   }
@@ -26,55 +23,35 @@ final class swmonkeyParserTests: XCTestCase {
   func testLetStatements() throws {
 
     XCTAssertEqual(
-      Ast.ExpressionNode.identifier(
-        token: Token(tokenType: Token.TokenType.assign, literal: "="),
-        value: "="),
-      Ast.ExpressionNode.identifier(
-        token: Token(tokenType: Token.TokenType.assign, literal: "="),
-        value: "=")
+      Ast.ExpressionNode.identifier(token: Token.assign, value: "="),
+      Ast.ExpressionNode.identifier(token: Token.assign, value: "=")
     )
 
     XCTAssertNotEqual(
-      Ast.ExpressionNode.identifier(
-        token: Token(tokenType: Token.TokenType.assign, literal: "="),
-        value: "="),
-      Ast.ExpressionNode.identifier(
-        token: Token(tokenType: Token.TokenType.eq, literal: "=="),
-        value: "==")
+      Ast.ExpressionNode.identifier(token: Token.assign, value: "="),
+      Ast.ExpressionNode.identifier(token: Token.eq, value: "==")
     )
 
     let tests = [
       (
         input: "let x = 5;",
         ident: "x",
-        node: Ast.ExpressionNode.integer(
-          token: Token(tokenType: .int(value: 5), literal: "5"),
-          value: 5
-        )
+        node: Ast.ExpressionNode.integer(token: Token.int(value: 5), value: 5)
       ),
       (
         input: "let y = true;",
         ident: "y",
-        node: Ast.ExpressionNode.boolean(
-          token: Token(tokenType: .true, literal: "true"),
-          value: true
-        )
+        node: Ast.ExpressionNode.boolean(token: Token.true, value: true)
       ),
       (
         input: "let x = false;",
         ident: "x",
-        node: Ast.ExpressionNode.boolean(
-          token: Token(tokenType: .false, literal: "false"),
-          value: false
-        )
+        node: Ast.ExpressionNode.boolean(token: Token.false, value: false)
       ),
       (
         input: "let foobar = y;",
         ident: "foobar",
-        node: Ast.ExpressionNode.identifier(
-          token: Token(tokenType: .ident, literal: "y"),
-          value: "y"
-        )
+        node: Ast.ExpressionNode.identifier(token: Token.ident(literal: "y"), value: "y")
       ),
     ]
 
@@ -90,35 +67,24 @@ final class swmonkeyParserTests: XCTestCase {
     [
       (
         input: "return 5;",
-        returnValue: Ast.ExpressionNode.integer(
-          token: Token(tokenType: .int(value: 5), literal: "5"),
-          value: 5
-        )
+        returnValue: Ast.ExpressionNode.integer(token: Token.int(value: 5), value: 5)
       ),
       (
         input: "return 10;",
-        returnValue: Ast.ExpressionNode.integer(
-          token: Token(tokenType: .int(value: 10), literal: "10"),
-          value: 10
-        )
+        returnValue: Ast.ExpressionNode.integer(token: Token.int(value: 10), value: 10)
       ),
       (
         input: "return 993322;",
-        returnValue: Ast.ExpressionNode.integer(
-          token: Token(tokenType: .int(value: 993322), literal: "993322"),
-          value: 993322
-        )
+        returnValue: Ast.ExpressionNode.integer(token: Token.int(value: 993322), value: 993322)
       ),
     ].forEach { test in
       let lexer = Lexer(input: test.input)
       let parser = Parser(lexer: lexer)
 
-      let returnToken = Token(tokenType: .return, literal: "return")
-
       XCTAssertEqual(
         parser.next(),
         Ast.StatementNode.returnStatement(
-          token: returnToken,
+          token: Token.return,
           returnValue: test.returnValue
         )
       )
@@ -134,9 +100,9 @@ final class swmonkeyParserTests: XCTestCase {
       XCTAssertEqual(
         parser.next(),
         Ast.StatementNode.expressionStatement(
-          token: Token(tokenType: .ident, literal: "foobar"),
+          token: Token.ident(literal: "foobar"),
           expression: Ast.ExpressionNode.identifier(
-            token: Token(tokenType: .ident, literal: "foobar"),
+            token: Token.ident(literal: "foobar"),
             value: "foobar"
           )
         )
@@ -153,9 +119,9 @@ final class swmonkeyParserTests: XCTestCase {
       XCTAssertEqual(
         parser.next(),
         Ast.StatementNode.expressionStatement(
-          token: Token(tokenType: .int(value: 5), literal: "5"),
+          token: Token.int(value: 5),
           expression: Ast.ExpressionNode.integer(
-            token: Token(tokenType: .int(value: 5), literal: "5"),
+            token: Token.int(value: 5),
             value: 5
           )
         )
@@ -167,33 +133,33 @@ final class swmonkeyParserTests: XCTestCase {
     [
       (
         input: "!5;",
-        token: Token(tokenType: .bang, literal: "!"),
+        token: Token.bang,
         right: Ast.ExpressionNode.integer(
-          token: Token(tokenType: .int(value: 5), literal: "5"),
+          token: Token.int(value: 5),
           value: 5
         )
       ),
       (
         input: "-15;",
-        token: Token(tokenType: .minus, literal: "-"),
+        token: Token.minus,
         right: Ast.ExpressionNode.integer(
-          token: Token(tokenType: .int(value: 15), literal: "15"),
+          token: Token.int(value: 15),
           value: 15
         )
       ),
       (
         input: "!true;",
-        token: Token(tokenType: .bang, literal: "!"),
+        token: Token.bang,
         right: Ast.ExpressionNode.boolean(
-          token: Token(tokenType: .true, literal: "true"),
+          token: Token.true,
           value: true
         )
       ),
       (
         input: "!false;",
-        token: Token(tokenType: .bang, literal: "!"),
+        token: Token.bang,
         right: Ast.ExpressionNode.boolean(
-          token: Token(tokenType: .false, literal: "false"),
+          token: Token.false,
           value: false
         )
       ),

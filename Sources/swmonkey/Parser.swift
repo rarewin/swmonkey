@@ -28,14 +28,14 @@ class Parser {
   /// `expected` なトークンであれば消費する
   ///
   /// - Parameter
-  ///   - expected: 期待するトークン
+  ///   - expected: 期待するトークン(連想値は無視される)
   /// - Returns: 期待したトークン。currentが異なるtypeであればnilが帰る
-  func consumeExpectedToken(expected: Token.TokenType) -> Token? {
+  func consumeExpectedToken(expected: Token) -> Token? {
     guard let token = currentToken else {
       return nil
     }
 
-    if token.tokenType == expected {
+    if Token.hasSameType(lhs: token, rhs: expected) {
       nextToken()
       return token
     } else {
@@ -51,7 +51,7 @@ class Parser {
       return nil
     }
 
-    switch token.tokenType {
+    switch token {
     case .let:
       return parseLetStatement()
     case .return:
@@ -68,11 +68,15 @@ class Parser {
       return nil
     }
 
-    guard let identToken = consumeExpectedToken(expected: .ident) else {
+    guard let identToken = consumeExpectedToken(expected: .ident(literal: "ignored")) else {
       return nil
     }
 
-    let name = Ast.Identifier(token: identToken, value: identToken.literal)
+    guard case let .ident(value) = identToken else {
+      return nil
+    }
+
+    let name = Ast.Identifier(token: identToken, value: value)
 
     guard consumeExpectedToken(expected: .assign) != nil else {
       return nil
@@ -121,7 +125,7 @@ class Parser {
   func parseExpression(precedence: Ast.OperationPrecedence) -> Ast.ExpressionNode? {
     let expression = prefixParse()
 
-    if peekToken?.tokenType == .semicolon {
+    if peekToken == .semicolon {
       let _ = consumeExpectedToken(expected: .semicolon)
     }
 
@@ -137,11 +141,11 @@ class Parser {
 
     nextToken()
 
-    switch token.tokenType {
-    case .ident:
-      return Ast.ExpressionNode.identifier(token: token, value: token.literal)
-    case .int:
-      return Ast.ExpressionNode.integer(token: token, value: Int64(token.literal)!)
+    switch token {
+    case let .ident(literal):
+      return Ast.ExpressionNode.identifier(token: token, value: literal)
+    case let .int(value):
+      return Ast.ExpressionNode.integer(token: token, value: value)
     case .true:
       return Ast.ExpressionNode.boolean(token: token, value: true)
     case .false:
