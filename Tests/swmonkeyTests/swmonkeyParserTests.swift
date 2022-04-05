@@ -189,9 +189,51 @@ final class swmonkeyParserTests: XCTestCase {
       (
         input: "5 + 5;",
         expectedToken: Token.plus,
-        expectedLeft: Ast.ExpressionNode.integer(token: Token.int(value: 5), value: 5),
-        expectedRight: Ast.ExpressionNode.integer(token: Token.int(value: 5), value: 5)
-      )
+        expectedLeftInt: 5,
+        expectedRightInt: 5
+      ),
+      (
+        input: "5 - 5;",
+        expectedToken: Token.minus,
+        expectedLeftInt: 5,
+        expectedRightInt: 5
+      ),
+      (
+        input: "5 * 5;",
+        expectedToken: Token.asterisk,
+        expectedLeftInt: 5,
+        expectedRightInt: 5
+      ),
+      (
+        input: "5 / 5;",
+        expectedToken: Token.slash,
+        expectedLeftInt: 5,
+        expectedRightInt: 5
+      ),
+      (
+        input: "5 == 5;",
+        expectedToken: Token.eq,
+        expectedLeftInt: 5,
+        expectedRightInt: 5
+      ),
+      (
+        input: "5 != 5;",
+        expectedToken: Token.notEq,
+        expectedLeftInt: 5,
+        expectedRightInt: 5
+      ),
+      (
+        input: "5 > 5;",
+        expectedToken: Token.gt,
+        expectedLeftInt: 5,
+        expectedRightInt: 5
+      ),
+      (
+        input: "5 < 5;",
+        expectedToken: Token.lt,
+        expectedLeftInt: 5,
+        expectedRightInt: 5
+      ),
     ].forEach { test in
       let lexer = Lexer(input: test.input)
       let parser = Parser(lexer: lexer)
@@ -208,8 +250,13 @@ final class swmonkeyParserTests: XCTestCase {
         expression,
         Ast.ExpressionNode.infixExpression(
           token: test.expectedToken,
-          left: test.expectedLeft,
-          right: test.expectedRight
+          left: Ast.ExpressionNode.integer(
+            token: Token.int(value: Int64(test.expectedLeftInt)),
+            value: Int64(test.expectedLeftInt)
+          ),
+          right: Ast.ExpressionNode.integer(
+            token: Token.int(value: Int64(test.expectedRightInt)),
+            value: Int64(test.expectedRightInt))
         )
       )
     }

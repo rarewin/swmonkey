@@ -198,7 +198,8 @@ class Parser {
     }
 
     switch operationToken {
-    case .plus:
+    case .plus, .minus, .asterisk, .slash,
+      .eq, .notEq, .gt, .lt:
       let precedence = currentPrecedence
       nextToken()
 
