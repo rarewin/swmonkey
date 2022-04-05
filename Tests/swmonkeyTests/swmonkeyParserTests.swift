@@ -9,7 +9,8 @@ final class swmonkeyParserTests: XCTestCase {
 
     guard case let .letStatement(token: token, name: name, value: value) = parsed
     else {
-      fatalError("\(String(describing: parsed)) is not a let statement")
+      XCTFail("\(String(describing: parsed)) is not a let statement")
+      return
     }
 
     XCTAssertEqual(token, Token.let)
@@ -100,7 +101,6 @@ final class swmonkeyParserTests: XCTestCase {
       XCTAssertEqual(
         parser.next(),
         Ast.StatementNode.expressionStatement(
-          token: Token.ident(literal: "foobar"),
           expression: Ast.ExpressionNode.identifier(
             token: Token.ident(literal: "foobar"),
             value: "foobar"
@@ -119,7 +119,6 @@ final class swmonkeyParserTests: XCTestCase {
       XCTAssertEqual(
         parser.next(),
         Ast.StatementNode.expressionStatement(
-          token: Token.int(value: 5),
           expression: Ast.ExpressionNode.integer(
             token: Token.int(value: 5),
             value: 5
@@ -169,15 +168,49 @@ final class swmonkeyParserTests: XCTestCase {
 
       let parsed = parser.next()
 
-      guard case let .expressionStatement(token: token, expression: expression) = parsed
+      guard case let .expressionStatement(expression: expression) = parsed
       else {
-        fatalError("\(String(describing: parsed)) is not prefix expression")
+        XCTFail("\(String(describing: parsed)) is not an expression statement")
+        return
       }
 
-      XCTAssertEqual(test.token, token)
       XCTAssertEqual(
         Ast.ExpressionNode.prefixExpression(token: test.token, right: test.right),
         expression
+      )
+    }
+  }
+
+  func testInfixExpressions() throws {
+
+    XCTAssert(Ast.OperationPrecedence.lowest < Ast.OperationPrecedence.equals)
+
+    [
+      (
+        input: "5 + 5;",
+        expectedToken: Token.plus,
+        expectedLeft: Ast.ExpressionNode.integer(token: Token.int(value: 5), value: 5),
+        expectedRight: Ast.ExpressionNode.integer(token: Token.int(value: 5), value: 5)
+      )
+    ].forEach { test in
+      let lexer = Lexer(input: test.input)
+      let parser = Parser(lexer: lexer)
+
+      let parsed = parser.next()
+
+      guard case let .expressionStatement(expression: expression) = parsed
+      else {
+        XCTFail("\(String(describing: parsed)) is not an expression statement")
+        return
+      }
+
+      XCTAssertEqual(
+        expression,
+        Ast.ExpressionNode.infixExpression(
+          token: test.expectedToken,
+          left: test.expectedLeft,
+          right: test.expectedRight
+        )
       )
     }
   }
