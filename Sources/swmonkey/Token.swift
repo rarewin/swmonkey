@@ -71,6 +71,31 @@ enum Token: Equatable {
   /// string
   case string(string: String)
 
+  var literal: String {
+    switch self {
+
+    case let .ident(literal: literal): return literal
+    case let .int(value: value): return String(value)
+
+    case .assign: return "="
+    case .plus: return "+"
+    case .minus: return "-"
+    case .bang: return "!"
+    case .asterisk: return "*"
+    case .slash: return "/"
+
+    case .gt: return ">"
+    case .lt: return "<"
+
+    case .eq: return "=="
+    case .notEq: return "!="
+
+    case .let: return "let"
+    default:
+      fatalError("unimplemented for \(self)")
+    }
+  }
+
   public static func hasSameType(lhs: Token, rhs: Token) -> Bool {
     switch lhs {
     case .ident(_):

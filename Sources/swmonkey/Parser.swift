@@ -16,7 +16,9 @@ class Parser {
   ///
   /// - Returns: statement node
   func next() -> Ast.StatementNode? {
-    return parseStatement()
+    let node = parseStatement()
+    nextToken()
+    return node
   }
 
   /// 次のトークンを取得する
@@ -133,6 +135,10 @@ class Parser {
       return nil
     }
 
+    if peekToken == .semicolon {
+      nextToken()
+    }
+
     return .expressionStatement(expression: expression)
   }
 
@@ -147,15 +153,14 @@ class Parser {
       return nil
     }
 
-    // print(
-    //   "peekToken: \(peekToken)  peekPrecedence: \(peekPrecedence)  currentToken: \(currentToken)"
-    // )
-
     while peekToken != .semicolon && precedence < peekPrecedence {
-      if let new = infixParse(left: left) {
-        left = new
+      if isInfixParsable {
+        nextToken()
+        if let new = infixParse(left: left) {
+          left = new
+        }
       } else {
-        fatalError()
+        return left
       }
     }
 
@@ -179,6 +184,7 @@ class Parser {
     case .false:
       return Ast.ExpressionNode.boolean(token: token, value: false)
     case .bang, .minus:
+      nextToken()
       guard let right = parseExpression(precedence: .prefix) else {
         return nil
       }
@@ -188,10 +194,18 @@ class Parser {
     }
   }
 
+  var isInfixParsable: Bool {
+    switch peekToken {
+    case .plus, .minus, .asterisk, .slash,
+      .eq, .notEq, .gt, .lt:
+      return true
+    default:
+      return false
+    }
+  }
+
   /// infixをパース
   func infixParse(left: Ast.ExpressionNode) -> Ast.ExpressionNode? {
-
-    nextToken()
 
     guard let operationToken = currentToken else {
       return nil
@@ -210,7 +224,7 @@ class Parser {
       return Ast.ExpressionNode.infixExpression(token: operationToken, left: left, right: right)
 
     default:
-      fatalError("unimplemented: \(#function) - \(#line)")
+      return nil
     }
   }
 }

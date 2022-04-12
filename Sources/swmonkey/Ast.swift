@@ -34,3 +34,33 @@ class Ast {
     let value: String
   }
 }
+
+extension Ast.StatementNode: CustomStringConvertible {
+  var description: String {
+    switch self {
+    case let .expressionStatement(expression: expression):
+      return String(describing: expression)
+    case let .letStatement(token: token, name: name, value: value):
+      return "\(token.literal) \(String(describing: name.value)) = \(String(describing: value))"
+    default:
+      fatalError("unimplemented")
+    }
+  }
+}
+
+extension Ast.ExpressionNode: CustomStringConvertible {
+  var description: String {
+    switch self {
+    case let .identifier(token: _, value: str):
+      return str
+    case let .integer(token: _, value: value):
+      return "\(value)"
+    case let .prefixExpression(token: token, right: right):
+      return "(\(token.literal)\(right))"
+    case let .infixExpression(token: token, left: left, right: right):
+      return "(\(left) \(token.literal) \(right))"
+    default:
+      fatalError("not implemented for \(self)")
+    }
+  }
+}

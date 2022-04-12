@@ -12,10 +12,17 @@ let monkeyFace = #"""
              '-----'
   """#
 
+let prompt = ">> "
+
+print(prompt, terminator: "")
+
 while let input = readLine() {
   let lexer = Lexer(input: input)
+  let parser = Parser(lexer: lexer)
 
-  while let token = lexer.next() {
-    print(token)
+  while let statement = parser.next() {
+    print(statement)
   }
+
+  print(prompt, terminator: "")
 }
