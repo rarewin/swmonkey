@@ -9,12 +9,12 @@ class Ast {
     case identifier(token: Token, value: String)
     case integer(token: Token, value: Int64)
     case string(token: Token, value: String)
-    case boolean(token: Token, value: Bool)
+    case boolean(token: Token)
     indirect case prefixExpression(token: Token, right: Ast.ExpressionNode)
     indirect case infixExpression(token: Token, left: Ast.ExpressionNode, right: Ast.ExpressionNode)
 
-    init?(token: Token, value: Bool) {
-      self = .boolean(token: token, value: value)
+    init?(token: Token) {
+      self = .boolean(token: token)
     }
   }
 
@@ -59,8 +59,10 @@ extension Ast.ExpressionNode: CustomStringConvertible {
       return "(\(token.literal)\(right))"
     case let .infixExpression(token: token, left: left, right: right):
       return "(\(left) \(token.literal) \(right))"
+    case let .boolean(token: token):
+      return "\(token.literal)"
     default:
-      fatalError("not implemented for \(self)")
+      fatalError("not implemented for ...")
     }
   }
 }

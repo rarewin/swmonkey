@@ -91,6 +91,8 @@ enum Token: Equatable {
     case .notEq: return "!="
 
     case .let: return "let"
+    case .true: return "true"
+    case .false: return "false"
     default:
       fatalError("unimplemented for \(self)")
     }

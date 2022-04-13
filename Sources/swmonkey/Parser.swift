@@ -180,9 +180,9 @@ class Parser {
     case let .int(value):
       return Ast.ExpressionNode.integer(token: token, value: value)
     case .true:
-      return Ast.ExpressionNode.boolean(token: token, value: true)
+      return Ast.ExpressionNode.boolean(token: token)
     case .false:
-      return Ast.ExpressionNode.boolean(token: token, value: false)
+      return Ast.ExpressionNode.boolean(token: token)
     case .bang, .minus:
       nextToken()
       guard let right = parseExpression(precedence: .prefix) else {

@@ -42,12 +42,12 @@ final class swmonkeyParserTests: XCTestCase {
       (
         input: "let y = true;",
         ident: "y",
-        node: Ast.ExpressionNode.boolean(token: Token.true, value: true)
+        node: Ast.ExpressionNode.boolean(token: Token.true)
       ),
       (
         input: "let x = false;",
         ident: "x",
-        node: Ast.ExpressionNode.boolean(token: Token.false, value: false)
+        node: Ast.ExpressionNode.boolean(token: Token.false)
       ),
       (
         input: "let foobar = y;",
@@ -149,18 +149,12 @@ final class swmonkeyParserTests: XCTestCase {
       (
         input: "!true;",
         token: Token.bang,
-        right: Ast.ExpressionNode.boolean(
-          token: Token.true,
-          value: true
-        )
+        right: Ast.ExpressionNode.boolean(token: Token.true)
       ),
       (
         input: "!false;",
         token: Token.bang,
-        right: Ast.ExpressionNode.boolean(
-          token: Token.false,
-          value: false
-        )
+        right: Ast.ExpressionNode.boolean(token: Token.false)
       ),
     ].forEach { test in
       let lexer = Lexer(input: test.input)
@@ -181,7 +175,7 @@ final class swmonkeyParserTests: XCTestCase {
     }
   }
 
-  func testInfixExpressions() throws {
+  func testInfixExpressionsIntegers() throws {
 
     XCTAssert(Ast.OperationPrecedence.lowest < Ast.OperationPrecedence.equals)
 
@@ -262,6 +256,49 @@ final class swmonkeyParserTests: XCTestCase {
     }
   }
 
+  func testInfixExpressionsBooleans() throws {
+    [
+      (
+        input: "true == true",
+        expectedLeft: Token.true,
+        expectedToken: Token.eq,
+        expectedRight: Token.true
+      ),
+      (
+        input: "true != false",
+        expectedLeft: Token.true,
+        expectedToken: Token.notEq,
+        expectedRight: Token.false
+      ),
+      (
+        input: "false == false",
+        expectedLeft: Token.false,
+        expectedToken: Token.eq,
+        expectedRight: Token.false
+      ),
+    ].forEach { test in
+      let lexer = Lexer(input: test.input)
+      let parser = Parser(lexer: lexer)
+
+      let parsed = parser.next()
+
+      guard case let .expressionStatement(expression: expression) = parsed
+      else {
+        XCTFail("\(String(describing: parsed)) is not an expression statement")
+        return
+      }
+
+      XCTAssertEqual(
+        expression,
+        Ast.ExpressionNode.infixExpression(
+          token: test.expectedToken,
+          left: Ast.ExpressionNode.boolean(token: test.expectedLeft),
+          right: Ast.ExpressionNode.boolean(token: test.expectedRight)
+        )
+      )
+    }
+  }
+
   func testOperatorPrecedenceParsing() throws {
     [
       (
@@ -311,6 +348,22 @@ final class swmonkeyParserTests: XCTestCase {
       (
         input: "3 + 4 * 5 == 3 * 1 + 4 * 5",
         expected: "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"
+      ),
+      (
+        input: "true",
+        expected: "true"
+      ),
+      (
+        input: "false",
+        expected: "false"
+      ),
+      (
+        input: "3 > 5 == false",
+        expected: "((3 > 5) == false)"
+      ),
+      (
+        input: "3 < 5 == true",
+        expected: "((3 < 5) == true)"
       ),
     ].forEach { test in
       let lexer = Lexer(input: test.input)
