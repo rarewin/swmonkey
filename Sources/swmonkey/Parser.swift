@@ -189,6 +189,16 @@ class Parser {
         return nil
       }
       return Ast.ExpressionNode.prefixExpression(token: token, right: right)
+    case .leftParen:
+      nextToken()
+      guard let exp = parseExpression(precedence: .lowest) else {
+        return nil
+      }
+      guard peekToken == .rightParen else {
+        return nil
+      }
+      nextToken()
+      return exp
     default:
       fatalError("unimplemented: \(#function) - \(#line) for \(token)")
     }
