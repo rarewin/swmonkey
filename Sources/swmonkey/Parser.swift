@@ -199,6 +199,37 @@ class Parser {
       }
       nextToken()
       return exp
+    case .if:
+      nextToken()  // consume "if"
+      guard let _ = consumeExpectedToken(expected: .leftParen) else {
+        return nil
+      }
+      guard let condition = parseExpression(precedence: .lowest) else {
+        return nil
+      }
+      nextToken()
+      guard let _ = consumeExpectedToken(expected: .rightParen) else {
+        return nil
+      }
+      guard let consequence = parseBlockStatement() else {
+        return nil
+      }
+
+      if currentToken != .else {
+        return Ast.ExpressionNode.ifExpression(
+          token: token, condition: condition, consequence: consequence, alternative: nil
+        )
+      }
+      nextToken()
+
+      guard let alternative = parseBlockStatement() else {
+        return nil
+      }
+
+      return Ast.ExpressionNode.ifExpression(
+        token: token, condition: condition, consequence: consequence, alternative: alternative
+      )
+
     default:
       fatalError("unimplemented: \(#function) - \(#line) for \(token)")
     }
@@ -236,6 +267,26 @@ class Parser {
     default:
       return nil
     }
+  }
+
+  func parseBlockStatement() -> [Ast.StatementNode]? {
+    guard let _ = consumeExpectedToken(expected: .leftBrace) else {
+      return nil
+    }
+    var statements: [Ast.StatementNode] = []
+    while currentToken != .rightBrace {
+      guard let statement = parseStatement() else {
+        return nil
+      }
+      nextToken()
+      statements.append(statement)
+    }
+
+    guard let _ = consumeExpectedToken(expected: .rightBrace) else {
+      return nil
+    }
+
+    return statements
   }
 }
 

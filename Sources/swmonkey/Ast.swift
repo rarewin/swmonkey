@@ -3,6 +3,7 @@ class Ast {
     case letStatement(token: Token, name: Identifier, value: ExpressionNode)
     case returnStatement(token: Token, returnValue: ExpressionNode)
     case expressionStatement(expression: ExpressionNode)
+    indirect case BlockStatement(statements: [StatementNode])
   }
 
   enum ExpressionNode: Equatable {
@@ -12,10 +13,12 @@ class Ast {
     case boolean(token: Token)
     indirect case prefixExpression(token: Token, right: Ast.ExpressionNode)
     indirect case infixExpression(token: Token, left: Ast.ExpressionNode, right: Ast.ExpressionNode)
-
-    init?(token: Token) {
-      self = .boolean(token: token)
-    }
+    indirect case ifExpression(
+      token: Token,
+      condition: Ast.ExpressionNode,
+      consequence: [Ast.StatementNode],
+      alternative: [Ast.StatementNode]?
+    )
   }
 
   enum OperationPrecedence: Equatable, Comparable {

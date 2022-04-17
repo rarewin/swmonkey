@@ -398,4 +398,96 @@ final class swmonkeyParserTests: XCTestCase {
       XCTAssertEqual(ret, test.expected)
     }
   }
+
+  func testIfExpression() throws {
+    let lexer = Lexer(input: "if (x < y) { x }")
+    let parser = Parser(lexer: lexer)
+
+    let parsed = parser.next()
+
+    guard case let .expressionStatement(expression: expression) = parsed
+    else {
+      XCTFail("\(String(describing: parsed)) is not an expression statement")
+      return
+    }
+
+    guard
+      case let .ifExpression(
+        token: token, condition: condition, consequence: consequence, alternative: alternative) =
+        expression
+    else {
+      XCTFail("\(expression) is not an if expression")
+      return
+    }
+
+    XCTAssertEqual(token, .if)
+    XCTAssertEqual(
+      condition,
+      .infixExpression(
+        token: Token.lt,
+        left: .identifier(token: Token.ident(literal: "x"), value: "x"),
+        right: .identifier(token: Token.ident(literal: "y"), value: "y")
+      )
+    )
+    XCTAssert(consequence.count == 1)
+    XCTAssertEqual(
+      consequence[0],
+      .expressionStatement(
+        expression: .identifier(token: Token.ident(literal: "x"), value: "x")
+      )
+    )
+    XCTAssert(alternative == nil)
+  }
+
+  func testIfElseExpression() throws {
+    let lexer = Lexer(input: "if (x < y) { x } else { y }")
+    let parser = Parser(lexer: lexer)
+
+    let parsed = parser.next()
+
+    guard case let .expressionStatement(expression: expression) = parsed
+    else {
+      XCTFail("\(String(describing: parsed)) is not an expression statement")
+      return
+    }
+
+    guard
+      case let .ifExpression(
+        token: token, condition: condition, consequence: consequence, alternative: alternative) =
+        expression
+    else {
+      XCTFail("\(expression) is not an if expression")
+      return
+    }
+
+    XCTAssertEqual(token, .if)
+    XCTAssertEqual(
+      condition,
+      .infixExpression(
+        token: Token.lt,
+        left: .identifier(token: Token.ident(literal: "x"), value: "x"),
+        right: .identifier(token: Token.ident(literal: "y"), value: "y")
+      )
+    )
+    XCTAssert(consequence.count == 1)
+    XCTAssertEqual(
+      consequence[0],
+      .expressionStatement(
+        expression: .identifier(token: Token.ident(literal: "x"), value: "x")
+      )
+    )
+
+    guard let alternative = alternative else {
+      XCTFail("insufficient alternative")
+      return
+    }
+
+    XCTAssert(alternative.count == 1)
+    XCTAssertEqual(
+      alternative[0],
+      .expressionStatement(
+        expression: .identifier(token: Token.ident(literal: "y"), value: "y")
+      )
+    )
+  }
 }
