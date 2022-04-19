@@ -3,7 +3,7 @@ class Ast {
     case letStatement(token: Token, name: Identifier, value: ExpressionNode)
     case returnStatement(token: Token, returnValue: ExpressionNode)
     case expressionStatement(expression: ExpressionNode)
-    indirect case BlockStatement(statements: [StatementNode])
+    indirect case blockStatement(statements: [StatementNode])
   }
 
   enum ExpressionNode: Equatable {
@@ -16,8 +16,13 @@ class Ast {
     indirect case ifExpression(
       token: Token,
       condition: Ast.ExpressionNode,
-      consequence: [Ast.StatementNode],
-      alternative: [Ast.StatementNode]?
+      consequence: Ast.StatementNode,
+      alternative: Ast.StatementNode?
+    )
+    indirect case functionExpression(
+      token: Token,
+      parameters: [Ast.ExpressionNode],
+      body: Ast.StatementNode
     )
   }
 

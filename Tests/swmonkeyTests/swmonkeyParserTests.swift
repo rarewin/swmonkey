@@ -429,6 +429,12 @@ final class swmonkeyParserTests: XCTestCase {
         right: .identifier(token: Token.ident(literal: "y"), value: "y")
       )
     )
+
+    guard case let .blockStatement(statements: consequence) = consequence else {
+      XCTFail("\(consequence) is not a block statement")
+      return
+    }
+
     XCTAssert(consequence.count == 1)
     XCTAssertEqual(
       consequence[0],
@@ -469,6 +475,12 @@ final class swmonkeyParserTests: XCTestCase {
         right: .identifier(token: Token.ident(literal: "y"), value: "y")
       )
     )
+
+    guard case let .blockStatement(statements: consequence) = consequence else {
+      XCTFail("\(consequence) is not a block statement")
+      return
+    }
+
     XCTAssert(consequence.count == 1)
     XCTAssertEqual(
       consequence[0],
@@ -482,11 +494,60 @@ final class swmonkeyParserTests: XCTestCase {
       return
     }
 
+    guard case let .blockStatement(statements: alternative) = alternative else {
+      XCTFail("\(consequence) is not a block statement")
+      return
+    }
+
     XCTAssert(alternative.count == 1)
     XCTAssertEqual(
       alternative[0],
       .expressionStatement(
         expression: .identifier(token: Token.ident(literal: "y"), value: "y")
+      )
+    )
+  }
+
+  func testFunctionLiteral() throws {
+    let lexer = Lexer(input: "fn(x, y) {x + y;}")
+    let parser = Parser(lexer: lexer)
+
+    let parsed = parser.next()
+
+    guard case let .expressionStatement(expression: expression) = parsed
+    else {
+      XCTFail("\(String(describing: parsed)) is not an expression statement")
+      return
+    }
+
+    guard
+      case let .functionExpression(token: token, parameters: parameters, body: body) = expression
+    else {
+      XCTFail("\(String(describing: expression)) is not a function expression statement")
+      return
+    }
+
+    XCTAssertEqual(token, .function)
+
+    XCTAssert(parameters.count == 2)
+    XCTAssertEqual(parameters[0], .identifier(token: Token(str: "x"), value: "x"))
+    XCTAssertEqual(parameters[1], .identifier(token: Token(str: "y"), value: "y"))
+
+    guard case let .blockStatement(statements: body) = body else {
+      XCTFail("\(body) is not a block statement")
+      return
+    }
+
+    XCTAssert(body.count == 1, "body.count should be 1, but \(body.count)")
+    XCTAssertEqual(
+      body[0],
+      .expressionStatement(
+        expression:
+          .infixExpression(
+            token: Token(str: "+"),
+            left: .identifier(token: Token(str: "x"), value: "x"),
+            right: .identifier(token: Token(str: "y"), value: "y")
+          )
       )
     )
   }

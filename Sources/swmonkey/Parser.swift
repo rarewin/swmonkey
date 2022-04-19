@@ -226,8 +226,47 @@ class Parser {
         return nil
       }
 
-      return Ast.ExpressionNode.ifExpression(
+      return .ifExpression(
         token: token, condition: condition, consequence: consequence, alternative: alternative
+      )
+
+    case .function:
+      nextToken()  // consume fn
+
+      guard let _ = consumeExpectedToken(expected: .leftParen) else {
+        return nil
+      }
+
+      var parameters: [Ast.ExpressionNode] = []
+
+      while currentToken != .rightParen {
+        guard let identToken = consumeExpectedToken(expected: .ident(literal: "ignored")) else {
+          return nil
+        }
+
+        guard case let .ident(value) = identToken else {
+          return nil
+        }
+
+        parameters.append(Ast.ExpressionNode.identifier(token: identToken, value: value))
+
+        if let _ = consumeExpectedToken(expected: .comma) {
+          guard currentToken != .rightParen else {
+            return nil
+          }
+        }
+      }
+
+      guard let _ = consumeExpectedToken(expected: .rightParen) else {
+        return nil
+      }
+
+      guard let body = parseBlockStatement() else {
+        return nil
+      }
+
+      return .functionExpression(
+        token: token, parameters: parameters, body: body
       )
 
     default:
@@ -269,7 +308,7 @@ class Parser {
     }
   }
 
-  func parseBlockStatement() -> [Ast.StatementNode]? {
+  func parseBlockStatement() -> Ast.StatementNode? {
     guard let _ = consumeExpectedToken(expected: .leftBrace) else {
       return nil
     }
@@ -286,7 +325,7 @@ class Parser {
       return nil
     }
 
-    return statements
+    return .blockStatement(statements: statements)
   }
 }
 
