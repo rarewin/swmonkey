@@ -111,6 +111,10 @@ class Parser {
       return nil
     }
 
+    if peekToken == .semicolon {
+      nextToken()
+    }
+
     return .letStatement(token: token, name: name, value: value)
   }
 
@@ -122,6 +126,10 @@ class Parser {
 
     guard let returnValue = parseExpression(precedence: .lowest) else {
       return nil
+    }
+
+    if peekToken == .semicolon {
+      nextToken()
     }
 
     return .returnStatement(token: token, returnValue: returnValue)

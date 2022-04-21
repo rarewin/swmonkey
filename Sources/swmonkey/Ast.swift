@@ -50,6 +50,11 @@ extension Ast.StatementNode: CustomStringConvertible {
       return String(describing: expression)
     case let .letStatement(token: token, name: name, value: value):
       return "\(token.literal) \(String(describing: name.value)) = \(String(describing: value))"
+    case let .blockStatement(statements: statements):
+      var ret = "{\n"
+      ret += statements.map { $0.description }.joined(separator: "\n")
+      ret += "\n}"
+      return ret
     default:
       fatalError("unimplemented")
     }
@@ -63,12 +68,14 @@ extension Ast.ExpressionNode: CustomStringConvertible {
       return str
     case let .integer(token: _, value: value):
       return "\(value)"
+    case let .boolean(token: token):
+      return "\(token.literal)"
     case let .prefixExpression(token: token, right: right):
       return "(\(token.literal)\(right))"
     case let .infixExpression(token: token, left: left, right: right):
       return "(\(left) \(token.literal) \(right))"
-    case let .boolean(token: token):
-      return "\(token.literal)"
+    case let .functionExpression(token: _, parameters: parameters, body: body):
+      return "fn(\(parameters.map{ $0.description }.joined(separator: ", "))) \(body)"
     default:
       fatalError("not implemented for ...")
     }
