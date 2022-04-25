@@ -12,11 +12,15 @@ class Parser {
     nextToken()
   }
 
+  enum ParseError: Error {
+    case unexpectedToken(token: Token, msg: String)
+  }
+
   /// パースして次のstatementを取得する
   ///
   /// - Returns: statement node
-  func next() -> Ast.StatementNode? {
-    let node = parseStatement()
+  func next() throws -> Ast.StatementNode? {
+    let node = try parseStatement()
     nextToken()
     return node
   }
@@ -71,43 +75,43 @@ class Parser {
   /// statementをパース
   ///
   /// - Returns: statement node
-  func parseStatement() -> Ast.StatementNode? {
+  func parseStatement() throws -> Ast.StatementNode? {
     guard let token = currentToken else {
       return nil
     }
 
     switch token {
     case .let:
-      return parseLetStatement()
+      return try parseLetStatement()
     case .return:
-      return parseReturnStatement()
+      return try parseReturnStatement()
     default:
-      return parseExpressionStatement()
+      return try parseExpressionStatement()
     }
   }
 
   /// let statementをパース
-  func parseLetStatement() -> Ast.StatementNode? {
+  func parseLetStatement() throws -> Ast.StatementNode? {
 
     guard let token = consumeExpectedToken(expected: .let) else {
-      return nil
+      throw ParseError.unexpectedToken(token: currentToken ?? .eof, msg: "let should be here")
     }
 
     guard let identToken = consumeExpectedToken(expected: .ident(literal: "ignored")) else {
-      return nil
+      throw ParseError.unexpectedToken(token: currentToken ?? .eof, msg: "should be identifier")
     }
 
     guard case let .ident(value) = identToken else {
-      return nil
+      fatalError("this condition can't be true")
     }
 
     let name = Ast.Identifier(token: identToken, value: value)
 
     guard consumeExpectedToken(expected: .assign) != nil else {
-      return nil
+      throw ParseError.unexpectedToken(token: currentToken ?? .eof, msg: "should be assign `='")
     }
 
-    guard let value = parseExpression(precedence: .lowest) else {
+    guard let value = try parseExpression(precedence: .lowest) else {
       return nil
     }
 
@@ -119,12 +123,12 @@ class Parser {
   }
 
   /// return statementをパース
-  func parseReturnStatement() -> Ast.StatementNode? {
+  func parseReturnStatement() throws -> Ast.StatementNode? {
     guard let token = consumeExpectedToken(expected: .return) else {
-      return nil
+      throw ParseError.unexpectedToken(token: currentToken ?? .eof, msg: "should be return")
     }
 
-    guard let returnValue = parseExpression(precedence: .lowest) else {
+    guard let returnValue = try parseExpression(precedence: .lowest) else {
       return nil
     }
 
@@ -138,8 +142,8 @@ class Parser {
   /// expression statementをパース
   ///
   /// - Returns: パース結果
-  func parseExpressionStatement() -> Ast.StatementNode? {
-    guard let expression = parseExpression(precedence: .lowest) else {
+  func parseExpressionStatement() throws -> Ast.StatementNode? {
+    guard let expression = try parseExpression(precedence: .lowest) else {
       return nil
     }
 
@@ -155,16 +159,16 @@ class Parser {
   /// - Parameter
   ///   - precedence: 順位
   /// - Returns: パース結果
-  func parseExpression(precedence: Ast.OperationPrecedence) -> Ast.ExpressionNode? {
+  func parseExpression(precedence: Ast.OperationPrecedence) throws -> Ast.ExpressionNode? {
 
-    guard var left = prefixParse() else {
+    guard var left = try prefixParse() else {
       return nil
     }
 
     while peekToken != .semicolon && precedence < peekPrecedence {
       if isInfixParsable {
         nextToken()
-        if let new = infixParse(left: left) {
+        if let new = try infixParse(left: left) {
           left = new
         }
       } else {
@@ -176,7 +180,7 @@ class Parser {
   }
 
   /// prefixをパース
-  func prefixParse() -> Ast.ExpressionNode? {
+  func prefixParse() throws -> Ast.ExpressionNode? {
 
     guard let token = currentToken else {
       return nil
@@ -193,33 +197,39 @@ class Parser {
       return Ast.ExpressionNode.boolean(token: token)
     case .bang, .minus:
       nextToken()
-      guard let right = parseExpression(precedence: .prefix) else {
+      guard let right = try parseExpression(precedence: .prefix) else {
         return nil
       }
       return Ast.ExpressionNode.prefixExpression(token: token, right: right)
+
     case .leftParen:
       nextToken()
-      guard let exp = parseExpression(precedence: .lowest) else {
+      guard let exp = try parseExpression(precedence: .lowest) else {
         return nil
       }
       guard peekToken == .rightParen else {
-        return nil
+        throw ParseError.unexpectedToken(token: currentToken ?? .eof, msg: "should be `)'")
       }
       nextToken()
       return exp
+
     case .if:
       nextToken()  // consume "if"
       guard let _ = consumeExpectedToken(expected: .leftParen) else {
-        return nil
+        throw ParseError.unexpectedToken(
+          token: currentToken ?? .eof, msg: "should be left parenthesis"
+        )
       }
-      guard let condition = parseExpression(precedence: .lowest) else {
+      guard let condition = try parseExpression(precedence: .lowest) else {
         return nil
       }
       nextToken()
       guard let _ = consumeExpectedToken(expected: .rightParen) else {
-        return nil
+        throw ParseError.unexpectedToken(
+          token: currentToken ?? .eof, msg: "should be right parenthesis"
+        )
       }
-      guard let consequence = parseBlockStatement() else {
+      guard let consequence = try parseBlockStatement() else {
         return nil
       }
 
@@ -230,7 +240,7 @@ class Parser {
       }
       nextToken()
 
-      guard let alternative = parseBlockStatement() else {
+      guard let alternative = try parseBlockStatement() else {
         return nil
       }
 
@@ -269,7 +279,7 @@ class Parser {
         return nil
       }
 
-      guard let body = parseBlockStatement() else {
+      guard let body = try parseBlockStatement() else {
         return nil
       }
 
@@ -278,7 +288,7 @@ class Parser {
       )
 
     default:
-      fatalError("unimplemented: \(#function) - \(#line) for \(token)")
+      throw ParseError.unexpectedToken(token: token, msg: "")
     }
   }
 
@@ -293,7 +303,7 @@ class Parser {
   }
 
   /// infixをパース
-  func infixParse(left: Ast.ExpressionNode) -> Ast.ExpressionNode? {
+  func infixParse(left: Ast.ExpressionNode) throws -> Ast.ExpressionNode? {
 
     guard let operationToken = currentToken else {
       return nil
@@ -305,7 +315,7 @@ class Parser {
       let precedence = currentPrecedence
       nextToken()
 
-      guard let right = parseExpression(precedence: precedence) else {
+      guard let right = try parseExpression(precedence: precedence) else {
         return nil  // ??
       }
 
@@ -316,21 +326,21 @@ class Parser {
     }
   }
 
-  func parseBlockStatement() -> Ast.StatementNode? {
+  func parseBlockStatement() throws -> Ast.StatementNode? {
     guard let _ = consumeExpectedToken(expected: .leftBrace) else {
-      return nil
+      throw ParseError.unexpectedToken(token: currentToken ?? .eof, msg: "should be left brace")
     }
     var statements: [Ast.StatementNode] = []
     while currentToken != .rightBrace {
-      guard let statement = parseStatement() else {
-        return nil
+      guard let statement = try parseStatement() else {
+        throw ParseError.unexpectedToken(token: currentToken ?? .eof, msg: "statement not found")
       }
       nextToken()
       statements.append(statement)
     }
 
     guard let _ = consumeExpectedToken(expected: .rightBrace) else {
-      return nil
+      throw ParseError.unexpectedToken(token: currentToken ?? .eof, msg: "should be right brace")
     }
 
     return .blockStatement(statements: statements)

@@ -20,8 +20,13 @@ while let input = readLine() {
   let lexer = Lexer(input: input)
   let parser = Parser(lexer: lexer)
 
-  while let statement = parser.next() {
-    print(statement)
+  do {
+    while let statement = try parser.next() {
+      print(statement)
+    }
+  } catch let (Parser.ParseError.unexpectedToken(token: token, msg: msg)) {
+    print(monkeyFace)
+    print("\(token) \(msg)")
   }
 
   print(prompt, terminator: "")
