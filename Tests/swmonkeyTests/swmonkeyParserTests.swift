@@ -60,12 +60,12 @@ final class swmonkeyParserTests: XCTestCase {
       let lexer = Lexer(input: t.input)
       let parser = Parser(lexer: lexer)
 
-      try testLetStatement(parsed: parser.next(), ident: t.ident, node: t.node)
+      try testLetStatement(parsed: try parser.next(), ident: t.ident, node: t.node)
     }
   }
 
   func testReturnStatements() throws {
-    [
+    try [
       (
         input: "return 5;",
         returnValue: Ast.ExpressionNode.integer(token: Token.int(value: 5), value: 5)
@@ -83,7 +83,7 @@ final class swmonkeyParserTests: XCTestCase {
       let parser = Parser(lexer: lexer)
 
       XCTAssertEqual(
-        parser.next(),
+        try parser.next(),
         Ast.StatementNode.returnStatement(
           token: Token.return,
           returnValue: test.returnValue
@@ -99,7 +99,7 @@ final class swmonkeyParserTests: XCTestCase {
       let parser = Parser(lexer: lexer)
 
       XCTAssertEqual(
-        parser.next(),
+        try parser.next(),
         Ast.StatementNode.expressionStatement(
           expression: Ast.ExpressionNode.identifier(
             token: Token.ident(literal: "foobar"),
@@ -117,7 +117,7 @@ final class swmonkeyParserTests: XCTestCase {
       let parser = Parser(lexer: lexer)
 
       XCTAssertEqual(
-        parser.next(),
+        try parser.next(),
         Ast.StatementNode.expressionStatement(
           expression: Ast.ExpressionNode.integer(
             token: Token.int(value: 5),
@@ -129,7 +129,7 @@ final class swmonkeyParserTests: XCTestCase {
   }
 
   func testPrefixExpressions() throws {
-    [
+    try [
       (
         input: "!5;",
         token: Token.bang,
@@ -160,7 +160,7 @@ final class swmonkeyParserTests: XCTestCase {
       let lexer = Lexer(input: test.input)
       let parser = Parser(lexer: lexer)
 
-      let parsed = parser.next()
+      let parsed = try parser.next()
 
       guard case let .expressionStatement(expression: expression) = parsed
       else {
@@ -179,7 +179,7 @@ final class swmonkeyParserTests: XCTestCase {
 
     XCTAssert(Ast.OperationPrecedence.lowest < Ast.OperationPrecedence.equals)
 
-    [
+    try [
       (
         input: "5 + 5;",
         expectedToken: Token.plus,
@@ -232,7 +232,7 @@ final class swmonkeyParserTests: XCTestCase {
       let lexer = Lexer(input: test.input)
       let parser = Parser(lexer: lexer)
 
-      let parsed = parser.next()
+      let parsed = try parser.next()
 
       guard case let .expressionStatement(expression: expression) = parsed
       else {
@@ -257,7 +257,7 @@ final class swmonkeyParserTests: XCTestCase {
   }
 
   func testInfixExpressionsBooleans() throws {
-    [
+    try [
       (
         input: "true == true",
         expectedLeft: Token.true,
@@ -280,7 +280,7 @@ final class swmonkeyParserTests: XCTestCase {
       let lexer = Lexer(input: test.input)
       let parser = Parser(lexer: lexer)
 
-      let parsed = parser.next()
+      let parsed = try parser.next()
 
       guard case let .expressionStatement(expression: expression) = parsed
       else {
@@ -300,7 +300,7 @@ final class swmonkeyParserTests: XCTestCase {
   }
 
   func testOperatorPrecedenceParsing() throws {
-    [
+    try [
       (
         input: "-a * b",
         expected: "((-a) * b)"
@@ -391,7 +391,7 @@ final class swmonkeyParserTests: XCTestCase {
 
       var ret = ""
 
-      while let statement = parser.next() {
+      while let statement = try parser.next() {
         ret += String(describing: statement)
       }
 
@@ -403,7 +403,7 @@ final class swmonkeyParserTests: XCTestCase {
     let lexer = Lexer(input: "if (x < y) { x }")
     let parser = Parser(lexer: lexer)
 
-    let parsed = parser.next()
+    let parsed = try parser.next()
 
     guard case let .expressionStatement(expression: expression) = parsed
     else {
@@ -449,7 +449,7 @@ final class swmonkeyParserTests: XCTestCase {
     let lexer = Lexer(input: "if (x < y) { x } else { y }")
     let parser = Parser(lexer: lexer)
 
-    let parsed = parser.next()
+    let parsed = try parser.next()
 
     guard case let .expressionStatement(expression: expression) = parsed
     else {
@@ -512,7 +512,7 @@ final class swmonkeyParserTests: XCTestCase {
     let lexer = Lexer(input: "fn(x, y) {x + y;}")
     let parser = Parser(lexer: lexer)
 
-    let parsed = parser.next()
+    let parsed = try parser.next()
 
     guard case let .expressionStatement(expression: expression) = parsed
     else {
